@@ -14,8 +14,8 @@ fn main() -> Result<()> {
 	
 	Ok(())
 }
-/// Output:
-/// ClassFile {
+// Output:
+// ClassFile {
 //     magic: 0xcafebabe,
 //     version: ClassVersion {
 //         major: JAVA_15,
