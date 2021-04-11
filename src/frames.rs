@@ -1,4 +1,4 @@
-use std::{convert::TryFrom, io::Write};
+use std::io::Write;
 
 use crate::error::{ParserError, Result};
 
@@ -141,7 +141,7 @@ impl StackMapFrame {
         })
     }
 
-    pub fn write<T: Write>(&self, wtr: &mut T) -> Result<()> {
+    pub fn write<T: Write>(&self, _wtr: &mut T) -> Result<()> {
         Ok(())
     }
 }

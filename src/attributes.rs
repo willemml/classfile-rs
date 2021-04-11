@@ -1,4 +1,4 @@
-use crate::constantpool::{ConstantPool, ConstantType, ConstantPoolWriter};
+use crate::{constantpool::{ConstantPool, ConstantType, ConstantPoolWriter}, frames::StackMapTableAttribute};
 use crate::version::{MajorVersion, ClassVersion};
 use crate::code::CodeAttribute;
 use crate::error::{Result, ParserError};
@@ -245,7 +245,6 @@ impl LocalVariable {
 		wtr.write_u16::<BigEndian>(start_pc as u16)?;
 		let end_pc = *label_pc_map.get(&self.end).ok_or_else(ParserError::unmapped_label)?;
 		wtr.write_u16::<BigEndian>((end_pc - start_pc) as u16)?;
-		ZIL
 		wtr.write_u16::<BigEndian>(constant_pool.utf8(self.name.clone()))?;
 		wtr.write_u16::<BigEndian>(constant_pool.utf8(self.descriptor.clone()))?;
 		
@@ -259,6 +258,7 @@ pub enum Attribute {
 	ConstantValue(ConstantValueAttribute),
 	Signature(SignatureAttribute),
 	Code(CodeAttribute),
+	StackMapTable(StackMapTableAttribute),
 	Exceptions(ExceptionsAttribute),
 	SourceFile(SourceFileAttribute),
 	LocalVariableTable(LocalVariableTableAttribute),
@@ -271,7 +271,6 @@ impl Attribute {
 		let attribute_length = rdr.read_u32::<BigEndian>()? as usize;
 		let buf: Vec<u8> = rdr.read_nbytes(attribute_length as usize)?;
 		let str = name.as_str();
-		
 		let attr = match source {
 			AttributeSource::Class => {
 				if str == "SourceFile" {
@@ -305,7 +304,8 @@ impl Attribute {
 				if str == "LocalVariableTable" {
 					Attribute::LocalVariableTable(LocalVariableTableAttribute::parse(constant_pool, buf, pc_label_map)?)
 				//} else if str == "LocalVariableTypeTable" && version.major >= MajorVersion::JAVA_5 {
-				
+				} else if str == "StackMapTable" {
+					Attribute::StackMapTable(StackMapTableAttribute::parse(buf)?)
 				} else {
 					Attribute::Unknown(UnknownAttribute::parse(name, buf)?)
 				}
@@ -364,6 +364,7 @@ impl Attribute {
 				wtr.write_u32::<BigEndian>(t.len() as u32)?;
 				t.write(wtr, constant_pool)?;
 			}
+			_ => {},
 		};
 		Ok(())
 	}
