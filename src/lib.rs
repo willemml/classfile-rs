@@ -16,6 +16,7 @@ pub mod insnlist;
 pub mod error;
 pub mod types;
 mod utils;
+mod frames;
 
 
 pub trait Serializable : Sized {

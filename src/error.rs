@@ -137,4 +137,4 @@ impl From<std::string::FromUtf8Error> for ParserError {
 	}
 }
 
-pub type Result<T> = result::Result<T, ParserError>;
+pub type Result<T, E = ParserError> = result::Result<T, E>;
